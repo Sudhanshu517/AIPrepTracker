@@ -88,6 +88,7 @@ export function CategoryCell({ problemId, initialCategory }: CategoryCellProps) 
                 onBlur={handleSubmit}
                 onKeyDown={handleKeyDown}
                 className="h-8 w-32"
+                placeholder="Add category tags"
             />
         );
     }

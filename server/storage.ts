@@ -170,6 +170,7 @@ export class MemStorage implements IStorage {
 
     // Sum up the scraper data (e.g., 74 LeetCode + 2 GFG)
     const platformMap = new Map<string, { total: number, easy: number, medium: number, hard: number }>();
+    const scrapedPlatforms = new Set<string>();
 
     storedStats.forEach(stat => {
       const t = stat.totalSolved || 0;
@@ -188,13 +189,21 @@ export class MemStorage implements IStorage {
         medium: (platformMap.get(stat.platform)?.medium || 0) + m,
         hard: (platformMap.get(stat.platform)?.hard || 0) + h
       });
+      scrapedPlatforms.add(stat.platform);
     });
 
     // 2. Also check the "Manually Added" problems list
     const problems = await this.getUserProblems(userId);
 
     // 3. Add manual problems to the totals and platform counts
+    // CRITICAL FIX: Only add if the platform is NOT already accounted for by the scraper
     problems.forEach(p => {
+      // If we already have scraped stats for this platform, skip adding individual problems to the total
+      // to avoid double counting.
+      if (scrapedPlatforms.has(p.platform)) {
+        return;
+      }
+
       total++;
 
       const diff = p.difficulty?.toLowerCase();

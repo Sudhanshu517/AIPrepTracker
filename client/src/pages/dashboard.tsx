@@ -137,25 +137,46 @@ export default function Dashboard() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
               <p className="text-gray-600">Track your coding progress across platforms</p>
             </div>
-            <div className="mt-4 lg:mt-0 flex space-x-3">
-              <Button variant="outline" className="border-gray-200 hover:bg-gray-50"
-                onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsSyncModalOpen(true)}
-                className="border-blue-200 text-blue-600 hover:bg-blue-50"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Sync Platforms
-              </Button>
-              <Button onClick={() => setIsAddModalOpen(true)} className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Problem
-              </Button>
-            </div>
+            <div className="mt-4 lg:mt-0 flex flex-wrap gap-3 justify-end">
+
+  <div className="flex flex-row sm:flex-col gap-3">
+  {/* Row 1 — Export + Sync */}
+    <div>
+
+    <Button
+      variant="outline"
+      className="border-gray-200 hover:bg-gray-50"
+      onClick={handleExport}
+      >
+      <Download className="w-4 h-4 mr-2" />
+      Export Data
+    </Button>
+
+    <Button
+      variant="outline"
+      onClick={() => setIsSyncModalOpen(true)}
+      className="border-blue-200 text-blue-600 hover:bg-blue-50"
+      >
+      <RefreshCw className="w-4 h-4 mr-2" />
+      Sync Platforms
+    </Button>
+      </div>
+
+  {/* Row 2 — Add Problem */}
+  <div className="w-full sm:w-auto">
+    <Button
+      onClick={() => setIsAddModalOpen(true)}
+      className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+      >
+      <Plus className="w-4 h-4 mr-2" />
+      Add Problem
+    </Button>
+  </div>
+      </div>
+
+</div>
+
+
           </div>
         </div>
 
@@ -255,114 +276,134 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity and Recommendations */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Activity */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
-              <div className="space-y-4">
-                {activityLoading ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                  </div>
-                ) : recentActivity && recentActivity.length > 0 ? (
-                  recentActivity.map((activity: any) => (
-                    <div key={activity.id} className="flex items-center space-x-4 py-3 border-b border-gray-100 last:border-b-0">
-                      <div className="w-2 h-2 bg-success rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-gray-900 font-medium">{activity.name}</p>
-                        <div className="text-gray-600 text-sm flex items-center flex-wrap gap-2 mt-1">
-                          <span className={`font-mono text-xs px-2 py-1 rounded ${getPlatformColor(activity.platform)}`}>
-                            {activity.platform}
-                          </span>
-                          <span>•</span>
-                          {/* Difficulty section */}
-                          {activity.difficulty ? (
-                            <span className={getDifficultyColor(activity.difficulty)}>
-                              {activity.difficulty}
-                            </span>
-                          ) : (
-                            <Select
-                              onValueChange={(value) =>
-                                updateDifficultyMutation.mutate({ id: activity.id, difficulty: value })
-                              }
-                            >
-                              <SelectTrigger className="w-28 h-6 text-xs">
-                                <SelectValue placeholder="Set difficulty" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="easy">Easy</SelectItem>
-                                <SelectItem value="medium">Medium</SelectItem>
-                                <SelectItem value="hard">Hard</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                          <span>•</span>
-                          <CategoryCell problemId={activity.id} initialCategory={activity.category} />
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {/* <p className="text-sm text-gray-500">{formatTimeAgo(activity.solved)}</p> */}
-                        {/* <p className="text-sm text-gray-500"><span className="text-gray-400 text-xs">Recently synced</span> */}
-                        <p className="text-sm text-gray-500"><span className="text-gray-400 text-xs">Synced {formatTimeAgo(activity.solved)}</span>
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 py-8">
-                    No recent activity. Start solving problems to see your progress here!
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+       {/* Recent Activity and Recommendations */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  {/* Recent Activity */}
+  <Card>
+    <CardContent className="p-6">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Recent Activity</h3>
+        <p className="text-xs text-gray-500 mb-4">
+          ✨ Smart Tagging: Manually set difficulty and category to personalize your dashboard insights.
+        </p>
+      </div>
 
-          {/* Recommended Problems */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Recommended Problems</h3>
-                <Button variant="ghost" className="text-primary hover:text-primary/80 text-sm font-medium">
-                  View All
-                </Button>
+      <div className="space-y-4">
+        {activityLoading ? (
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto" />
+          </div>
+        ) : recentActivity && recentActivity.length > 0 ? (
+          recentActivity.map((activity: any) => (
+            <div
+              key={activity.id}
+              className="flex items-center space-x-4 py-3 border-b border-gray-100 last:border-b-0"
+            >
+              <div className="w-2 h-2 bg-success rounded-full" />
+              <div className="flex-1">
+                <p className="text-gray-900 font-medium">{activity.name}</p>
+
+                <div className="text-gray-600 text-sm flex items-center flex-wrap gap-2 mt-1">
+                  <span className={`font-mono text-xs px-2 py-1 rounded ${getPlatformColor(activity.platform)}`}>
+                    {activity.platform}
+                  </span>
+
+                  <span>•</span>
+
+                  {activity.difficulty ? (
+                    <span className={getDifficultyColor(activity.difficulty)}>{activity.difficulty}</span>
+                  ) : (
+                    <Select
+                      onValueChange={(value) =>
+                        updateDifficultyMutation.mutate({ id: activity.id, difficulty: value })
+                      }
+                    >
+                      <SelectTrigger className="w-28 h-6 text-xs">
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  <span>•</span>
+
+                  <CategoryCell problemId={activity.id} initialCategory={activity.category} />
+                </div>
               </div>
-              <div className="space-y-4">
-                {recommendationsLoading ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                  </div>
-                ) : recommendations && recommendations.length > 0 ? (
-                  recommendations.slice(0, 5).map((problem: any) => (
-                    <div key={problem.id} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-b-0">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{problem.problemName}</h4>
-                        <p className="text-gray-600 text-sm mt-1">
-                          <span className={`text-xs px-2 py-1 rounded font-mono mr-2 ${getPlatformColor(problem.platform)}`}>
-                            {problem.platform}
-                          </span>
-                          <span className={`font-medium ${getDifficultyColor(problem.difficulty)}`}>
-                            {problem.difficulty}
-                          </span>
-                          <span className="mx-2">•</span>
-                          <span>{problem.category}</span>
-                        </p>
-                      </div>
-                      <Button size="sm" className="bg-primary hover:bg-primary/90">
-                        Solve
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 py-8">
-                    No recommendations available. Add some problems to get personalized suggestions!
-                  </div>
-                )}
+
+              <div className="text-right">
+                <p className="text-sm text-gray-500">
+                  <span className="text-gray-400 text-xs">Synced {formatTimeAgo(activity.solved)}</span>
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 py-8">
+            No recent activity yet. Start solving problems to see them appear here!
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+
+  {/* Recommended Problems */}
+  <Card>
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">Recommended Problems</h3>
+        <Button variant="ghost" className="text-primary hover:text-primary/80 text-sm font-medium">
+          View All
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        {recommendationsLoading ? (
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto" />
+          </div>
+        ) : stats?.total === 0 ? (
+          // when no problems exist at all
+          <div className="text-center text-gray-500 py-8">
+            No recommendations available. Add some problems to generate personalized suggestions!
+          </div>
+        ) : recommendations.length === 0 ? (
+          // problems exist but recs not generated
+          <div className="text-center text-gray-500 py-8">
+            No recommendations found. If you have added problems, use the Recommendations tab to generate AI-powered suggestions.
+          </div>
+        ) : (
+          // render recommendations
+          recommendations.slice(0, 5).map((problem: any) => (
+            <div key={problem.id ?? problem.problemName} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-b-0">
+              <div>
+                <h4 className="font-medium text-gray-900">{problem.problemName}</h4>
+                <p className="text-gray-600 text-sm mt-1">
+                  <span className={`text-xs px-2 py-1 rounded font-mono mr-2 ${getPlatformColor(problem.platform)}`}>
+                    {problem.platform}
+                  </span>
+                  <span className={`font-medium ${getDifficultyColor(problem.difficulty)}`}>
+                    {problem.difficulty}
+                  </span>
+                  <span className="mx-2">•</span>
+                  <span>{problem.category}</span>
+                </p>
+              </div>
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                <a href={problem.url ?? problem.link ?? "#"} target="_blank" rel="noopener noreferrer">Solve</a>
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </CardContent>
+  </Card>
+</div>
+
       </main>
 
       <AddProblemModal

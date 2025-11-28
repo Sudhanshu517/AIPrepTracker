@@ -50,6 +50,45 @@ export class PostgresStorage implements IStorage {
             .insert(problems)
             .values({ ...problem, userId })
             .returning();
+
+        // Update platform stats
+        const platform = problem.platform;
+        const difficulty = problem.difficulty?.toLowerCase() || 'medium'; // Default to medium if null
+
+        const existingStats = await this.dbInstance.query.platformStats.findFirst({
+            where: and(
+                eq(platformStats.userId, userId),
+                eq(platformStats.platform, platform)
+            )
+        });
+
+        const isEasy = difficulty === 'easy';
+        const isMedium = difficulty === 'medium';
+        const isHard = difficulty === 'hard';
+
+        if (existingStats) {
+            await this.dbInstance
+                .update(platformStats)
+                .set({
+                    totalSolved: (existingStats.totalSolved || 0) + 1,
+                    easySolved: (existingStats.easySolved || 0) + (isEasy ? 1 : 0),
+                    mediumSolved: (existingStats.mediumSolved || 0) + (isMedium ? 1 : 0),
+                    hardSolved: (existingStats.hardSolved || 0) + (isHard ? 1 : 0),
+                    lastUpdated: new Date()
+                })
+                .where(eq(platformStats.id, existingStats.id));
+        } else {
+            await this.dbInstance.insert(platformStats).values({
+                userId,
+                platform,
+                totalSolved: 1,
+                easySolved: isEasy ? 1 : 0,
+                mediumSolved: isMedium ? 1 : 0,
+                hardSolved: isHard ? 1 : 0,
+                lastUpdated: new Date()
+            });
+        }
+
         return result;
     }
 
@@ -110,6 +149,7 @@ export class PostgresStorage implements IStorage {
         }[];
         categoryStats: { category: string; count: number }[];
     }> {
+        // 1. Get stats strictly from platformStats table
         const storedStats = await this.dbInstance.query.platformStats.findMany({
             where: eq(platformStats.userId, userId)
         });
@@ -119,9 +159,7 @@ export class PostgresStorage implements IStorage {
         let medium = 0;
         let hard = 0;
 
-        const platformMap = new Map<string, { total: number, easy: number, medium: number, hard: number }>();
-
-        storedStats.forEach(stat => {
+        const pStats = storedStats.map(stat => {
             const t = stat.totalSolved || 0;
             const e = stat.easySolved || 0;
             const m = stat.mediumSolved || 0;
@@ -132,44 +170,20 @@ export class PostgresStorage implements IStorage {
             medium += m;
             hard += h;
 
-            platformMap.set(stat.platform, {
-                total: (platformMap.get(stat.platform)?.total || 0) + t,
-                easy: (platformMap.get(stat.platform)?.easy || 0) + e,
-                medium: (platformMap.get(stat.platform)?.medium || 0) + m,
-                hard: (platformMap.get(stat.platform)?.hard || 0) + h
-            });
+            return {
+                platform: stat.platform,
+                count: t,
+                easy: e,
+                medium: m,
+                hard: h
+            };
         });
 
+        // 2. Calculate category stats from problems table (Recent Activity)
+        // This is the ONLY thing we use the problems table for in stats
         const userProblems = await this.getUserProblems(userId);
-
-        userProblems.forEach(p => {
-            total++;
-
-            const diff = p.difficulty?.toLowerCase();
-            let isEasy = false, isMedium = false, isHard = false;
-
-            if (diff === 'easy') { easy++; isEasy = true; }
-            else if (diff === 'medium') { medium++; isMedium = true; }
-            else if (diff === 'hard') { hard++; isHard = true; }
-
-            const current = platformMap.get(p.platform) || { total: 0, easy: 0, medium: 0, hard: 0 };
-            platformMap.set(p.platform, {
-                total: current.total + 1,
-                easy: current.easy + (isEasy ? 1 : 0),
-                medium: current.medium + (isMedium ? 1 : 0),
-                hard: current.hard + (isHard ? 1 : 0)
-            });
-        });
-
-        const pStats = Array.from(platformMap.entries()).map(([platform, stats]) => ({
-            platform,
-            count: stats.total,
-            easy: stats.easy,
-            medium: stats.medium,
-            hard: stats.hard
-        }));
-
         const categoryCounts = new Map<string, number>();
+
         userProblems.forEach(p => {
             if (p.category) {
                 const count = categoryCounts.get(p.category) || 0;
@@ -315,11 +329,51 @@ export class PostgresStorage implements IStorage {
 
     async deleteProblem(id: number, userId: string): Promise<void> {
         console.log(`[PostgresStorage] Deleting problem ${id} for user ${userId}`);
+
+        // 1. Get the problem first to know its platform and difficulty
+        const problem = await this.dbInstance.query.problems.findFirst({
+            where: and(eq(problems.id, id), eq(problems.userId, userId))
+        });
+
+        if (!problem) {
+            console.log(`[PostgresStorage] Problem ${id} not found`);
+            return;
+        }
+
+        // 2. Delete the problem
         const res = await this.dbInstance
             .delete(problems)
             .where(and(eq(problems.id, id), eq(problems.userId, userId)))
             .returning();
         console.log(`[PostgresStorage] Deleted problem result:`, res);
+
+        // 3. Update platform stats (decrement)
+        const platform = problem.platform;
+        const difficulty = problem.difficulty?.toLowerCase() || 'medium';
+
+        const existingStats = await this.dbInstance.query.platformStats.findFirst({
+            where: and(
+                eq(platformStats.userId, userId),
+                eq(platformStats.platform, platform)
+            )
+        });
+
+        if (existingStats) {
+            const isEasy = difficulty === 'easy';
+            const isMedium = difficulty === 'medium';
+            const isHard = difficulty === 'hard';
+
+            await this.dbInstance
+                .update(platformStats)
+                .set({
+                    totalSolved: Math.max(0, (existingStats.totalSolved || 0) - 1),
+                    easySolved: Math.max(0, (existingStats.easySolved || 0) - (isEasy ? 1 : 0)),
+                    mediumSolved: Math.max(0, (existingStats.mediumSolved || 0) - (isMedium ? 1 : 0)),
+                    hardSolved: Math.max(0, (existingStats.hardSolved || 0) - (isHard ? 1 : 0)),
+                    lastUpdated: new Date()
+                })
+                .where(eq(platformStats.id, existingStats.id));
+        }
     }
 
     async deleteProblemsByPlatform(userId: string, platform: string): Promise<void> {

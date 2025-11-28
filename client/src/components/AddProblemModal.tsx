@@ -116,7 +116,7 @@ export function AddProblemModal({ isOpen, onClose }: AddProblemModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold text-gray-900">
@@ -216,7 +216,7 @@ export function AddProblemModal({ isOpen, onClose }: AddProblemModalProps) {
                   <FormControl>
                     <>
                       <Input
-                        placeholder="e.g., array, string, tree, etc."
+                        placeholder="Add category tags"
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                         {...field}
                         value={field.value || ''}
