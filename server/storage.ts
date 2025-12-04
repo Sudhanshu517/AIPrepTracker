@@ -49,6 +49,7 @@ export interface IStorage {
   clearProblems(userId: string): Promise<void>;
   deleteProblem(id: number, userId: string): Promise<void>;
   deleteProblemsByPlatform(userId: string, platform: string): Promise<void>;
+  deletePlatformCredential(id: number, userId: string): Promise<void>;
 }
 
 // Memory-based storage implementation
@@ -388,6 +389,12 @@ export class MemStorage implements IStorage {
     const userStats = this.platformStats.get(userId) || [];
     const updatedStats = userStats.filter(s => s.platform !== platform);
     this.platformStats.set(userId, updatedStats);
+  }
+
+  async deletePlatformCredential(id: number, userId: string): Promise<void> {
+    const credentials = this.platformCredentials.get(userId) || [];
+    const updatedCredentials = credentials.filter(c => c.id !== id);
+    this.platformCredentials.set(userId, updatedCredentials);
   }
 }
 

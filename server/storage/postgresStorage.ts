@@ -390,4 +390,10 @@ export class PostgresStorage implements IStorage {
             .delete(platformStats)
             .where(and(eq(platformStats.userId, userId), eq(platformStats.platform, platform)));
     }
+
+    async deletePlatformCredential(id: number, userId: string): Promise<void> {
+        await this.dbInstance
+            .delete(platformCredentials)
+            .where(and(eq(platformCredentials.id, id), eq(platformCredentials.userId, userId)));
+    }
 }

@@ -169,6 +169,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/platform-credentials/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const credentialId = parseInt(req.params.id);
+
+      if (isNaN(credentialId)) {
+        return res.status(400).json({ message: "Invalid credential ID" });
+      }
+
+      await storage.deletePlatformCredential(credentialId, userId);
+      res.sendStatus(204);
+    } catch (error) {
+      console.error("Error deleting platform credential:", error);
+      res.status(500).json({ message: "Failed to delete platform credential" });
+    }
+  });
+
+  app.post('/api/platform-credentials/:id/sync', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const credentialId = parseInt(req.params.id);
+
+      if (isNaN(credentialId)) {
+        return res.status(400).json({ message: "Invalid credential ID" });
+      }
+
+      // 1. Get the credential to know which platform/username to sync
+      const credentials = await storage.getUserPlatformCredentials(userId);
+      const credential = credentials.find(c => c.id === credentialId);
+
+      if (!credential) {
+        return res.status(404).json({ message: "Credential not found" });
+      }
+
+      // 2. Construct the credentials object for the scraper
+      const platformCreds: any = {};
+      platformCreds[credential.platform] = credential.username;
+
+      // 3. Run the sync
+      const results = await scrapingService.syncUserData(userId, platformCreds);
+
+      // 4. Update the last sync time if successful
+      if (results.success) {
+        await storage.updateLastSyncTime(userId, credential.platform);
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error("Error syncing platform credential:", error);
+      res.status(500).json({ message: "Failed to sync platform credential" });
+    }
+  });
+
   // Platform sync route
   app.post('/api/sync-platforms', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
@@ -180,6 +233,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const results = await scrapingService.syncUserData(userId, platforms);
+
+      // Save credentials for successfully synced platforms
+      if (results.success) {
+        for (const [platform, username] of Object.entries(platforms)) {
+          if (typeof username === 'string' && username.trim()) {
+            await storage.savePlatformCredentials(userId, {
+              platform,
+              username: username.trim()
+            });
+            await storage.updateLastSyncTime(userId, platform);
+          }
+        }
+      }
+
       res.json(results);
     } catch (error) {
       console.error("Error syncing platforms:", error);

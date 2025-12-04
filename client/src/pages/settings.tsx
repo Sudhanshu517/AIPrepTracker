@@ -40,7 +40,7 @@ export default function SettingsPage() {
   const [isAddingCredential, setIsAddingCredential] = useState(false);
 
   const { data: credentials = [], isLoading } = useQuery<PlatformCredential[]>({
-    queryKey: ["/api/credentials"],
+    queryKey: ["/api/platform-credentials"],
   });
 
   const form = useForm({
@@ -53,10 +53,10 @@ export default function SettingsPage() {
 
   const addCredentialMutation = useMutation({
     mutationFn: async (data: { platform: string; username: string }) => {
-      return apiRequest("POST", "/api/credentials", data);
+      return apiRequest("POST", "/api/platform-credentials", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/credentials"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-credentials"] });
       setIsAddingCredential(false);
       form.reset();
       toast({
@@ -75,10 +75,10 @@ export default function SettingsPage() {
 
   const deleteCredentialMutation = useMutation({
     mutationFn: async (credentialId: number) => {
-      return apiRequest("DELETE", `/api/credentials/${credentialId}`);
+      return apiRequest("DELETE", `/api/platform-credentials/${credentialId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/credentials"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-credentials"] });
       toast({
         title: "Platform removed",
         description: "Your platform credentials have been deleted.",
@@ -95,10 +95,10 @@ export default function SettingsPage() {
 
   const syncMutation = useMutation({
     mutationFn: async (credentialId: number) => {
-      return apiRequest("POST", `/api/sync/${credentialId}`);
+      return apiRequest("POST", `/api/platform-credentials/${credentialId}/sync`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/credentials"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-credentials"] });
       queryClient.invalidateQueries({ queryKey: ["/api/problems"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       toast({
@@ -179,7 +179,7 @@ export default function SettingsPage() {
                       ? `${user.firstName} ${user.lastName}`
                       : "User"}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">{user?.email}</p>
+                  <p className="text-gray-600 dark:text-gray-400 hidden sm:block">{user?.email}</p>
                 </div>
               </div>
 
@@ -353,9 +353,8 @@ export default function SettingsPage() {
                               data-testid={`button-sync-${credential.id}`}
                             >
                               <RefreshCw
-                                className={`w-4 h-4 mr-2 ${
-                                  syncMutation.isPending ? "animate-spin" : ""
-                                }`}
+                                className={`w-4 h-4 mr-2 ${syncMutation.isPending ? "animate-spin" : ""
+                                  }`}
                               />
                               Sync
                             </Button>
