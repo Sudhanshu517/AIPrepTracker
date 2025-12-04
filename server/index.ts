@@ -8,7 +8,7 @@ dotenv.config({
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, serveStatic } from "./vite";
 import { storage } from "./storage";
 console.log("🔥 ACTUAL STORAGE IMPLEMENTATION:", storage.constructor.name);
 
@@ -52,7 +52,7 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      // log(logLine);
     }
   });
 
@@ -71,7 +71,7 @@ app.use((req, res, next) => {
   });
 
 
-   // 🔥 ADD THIS
+  // 🔥 ADD THIS
   // Allow Vite to handle all non-API routes
   app.get(/^(?!\/api).*/, (req, res, next) => {
     next();
@@ -86,11 +86,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+  server.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+  });
 })();

@@ -43,17 +43,20 @@ export function Sidebar({ user }: SidebarProps) {
           <ul className="space-y-2">
             {menuItems.map((item) => (
               <li key={item.path}>
-                <Link href={item.path}>
-                  <a className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${item.active
+                <Link
+                  href={item.path}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${item.active
                       ? "bg-primary/10 text-primary font-medium"
                       : "text-gray-600 hover:bg-gray-100"
-                    }`} data-testid={`link-nav-${item.label.toLowerCase().replace(' ', '-')}`}>
-                    <item.icon size={20} />
-                    <span>{item.label}</span>
-                  </a>
+                    }`}
+                  data-testid={`link-nav-${item.label.toLowerCase().replace(' ', '-')}`}
+                >
+                  <item.icon size={20} />
+                  <span>{item.label}</span>
                 </Link>
               </li>
             ))}
+
           </ul>
         </nav>
 

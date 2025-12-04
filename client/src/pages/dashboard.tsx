@@ -133,51 +133,48 @@ export default function Dashboard() {
         {/* Dashboard Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-              <p className="text-gray-600">Track your coding progress across platforms</p>
-            </div>
-            <div className="mt-4 lg:mt-0 flex flex-wrap gap-3 justify-end">
-
-  <div className="flex flex-row sm:flex-col gap-3">
-  {/* Row 1 — Export + Sync */}
-    <div>
-
-    <Button
-      variant="outline"
-      className="border-gray-200 hover:bg-gray-50"
-      onClick={handleExport}
-      >
-      <Download className="w-4 h-4 mr-2" />
-      Export Data
-    </Button>
-
-    <Button
-      variant="outline"
-      onClick={() => setIsSyncModalOpen(true)}
-      className="border-blue-200 text-blue-600 hover:bg-blue-50"
-      >
-      <RefreshCw className="w-4 h-4 mr-2" />
-      Sync Platforms
-    </Button>
-      </div>
-
-  {/* Row 2 — Add Problem */}
-  <div className="w-full sm:w-auto">
-    <Button
-      onClick={() => setIsAddModalOpen(true)}
-      className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-      >
-      <Plus className="w-4 h-4 mr-2" />
-      Add Problem
-    </Button>
+  <div>
+    <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+    <p className="text-gray-600">Track your coding progress across platforms</p>
   </div>
-      </div>
 
+  <div className="mt-4 lg:mt-0 flex flex-wrap gap-3 justify-end">
+
+    {/* Row 1: Export + Sync */}
+    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <Button
+        variant="outline"
+        className="border-gray-200 hover:bg-gray-50"
+        onClick={handleExport}
+      >
+        <Download className="w-4 h-4 mr-2" />
+        Export Data
+      </Button>
+
+      <Button
+        variant="outline"
+        onClick={() => setIsSyncModalOpen(true)}
+        className="border-blue-200 text-blue-600 hover:bg-blue-50"
+      >
+        <RefreshCw className="w-4 h-4 mr-2" />
+        Sync Platforms
+      </Button>
+    </div>
+
+    {/* Row 2 — Add Problem */}
+    <div className="w-full sm:w-auto">
+      <Button
+        onClick={() => setIsAddModalOpen(true)}
+        className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add Problem
+      </Button>
+    </div>
+
+  </div>
 </div>
 
-
-          </div>
         </div>
 
         {/* Stats Overview */}

@@ -24,6 +24,10 @@ export function MobileHeader() {
     { icon: Settings, label: "Settings", path: "/settings", active: location === "/settings" },
   ];
 
+  const currentTitle =
+  menuItems.find((item) => item.path === location)?.label || "Dashboard";
+
+
   return (
     <>
       <div className="lg:hidden bg-white border-b border-gray-200 p-4">
@@ -36,7 +40,7 @@ export function MobileHeader() {
           >
             <Menu size={20} />
           </Button>
-          <h1 className="font-semibold text-gray-900">Dashboard</h1>
+          <h1 className="font-semibold text-gray-900">{currentTitle}</h1>
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
             {user?.profileImageUrl ? (
               <img
