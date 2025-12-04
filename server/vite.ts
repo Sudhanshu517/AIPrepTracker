@@ -73,9 +73,26 @@ export function serveStatic(app: Express) {
     throw new Error(`Could not find build directory: ${distPath}`);
   }
 
+  // 🔥 Fix: Clerk SSO callback must load React index.html
+  app.get(
+    [
+      "/sign-in/*",
+      "/sign-up/*",
+      "/sign-in/sso-callback",
+      "/sign-up/sso-callback",
+      "/sso-callback"
+    ],
+    (_req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    }
+  );
+
+  // Serve static files
   app.use(express.static(distPath));
 
+  // Default SPA fallback (React router)
   app.use("*", (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
+

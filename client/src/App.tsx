@@ -18,7 +18,7 @@ import SignUpPage from "@/pages/sign-up";
 
 function ClerkSessionSync() {
   const { session } = useSession();
-  
+
   useEffect(() => {
     setGetToken(async () => {
       if (session) {
@@ -27,7 +27,7 @@ function ClerkSessionSync() {
       return null;
     });
   }, [session]);
-  
+
   return null;
 }
 
@@ -48,7 +48,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/sign-in" component={SignInPage} />
+      <Route path="/sign-in/*" component={SignInPage} />
       <Route path="/sign-up" component={SignUpPage} />
+      <Route path="/sign-up/*" component={SignUpPage} />
       <Route path="/">
         <ProtectedRoute component={Dashboard} />
       </Route>
