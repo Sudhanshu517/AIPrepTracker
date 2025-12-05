@@ -231,6 +231,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!platforms || typeof platforms !== 'object') {
         return res.status(400).json({ message: "Invalid platforms data" });
       }
+      console.log("🔥 Sync route hit, starting Puppeteer...");
+
 
       const results = await scrapingService.syncUserData(userId, platforms);
 
