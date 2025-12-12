@@ -13,8 +13,12 @@ RUN mkdir -p /app && chown -R pptruser:pptruser /app
 # Use pptruser (required for Puppeteer)
 USER pptruser
 
-# Copy package files first
+# Copy package files
 COPY --chown=pptruser:pptruser package*.json ./
+
+# Define build-time variables (important!)
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 
 # Install dependencies
 RUN npm install
@@ -22,7 +26,7 @@ RUN npm install
 # Copy rest of the project
 COPY --chown=pptruser:pptruser . .
 
-# Build frontend + server
+# Build
 RUN npm run build
 
 # Expose port
