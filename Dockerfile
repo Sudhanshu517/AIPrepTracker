@@ -1,16 +1,16 @@
-FROM ghcr.io/puppeteer/puppeteer:24.33.0
+FROM ghcr.io/puppeteer/puppeteer:latest
 
-
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 # Set working directory
-WORKDIR /app
+WORKDIR usr/src//app
 
 # Copy package files first (better caching)
 COPY package*.json ./
 
+RUN npm ci
+
 # Skip puppeteer's built-in Chromium download
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 # Install dependencies
 RUN npm install
 
