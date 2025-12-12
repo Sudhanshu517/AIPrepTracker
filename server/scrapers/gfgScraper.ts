@@ -26,20 +26,20 @@ export class GFGScraper {
       console.log(`Starting GFG scrape for: ${username}`);
       const isLocalDev = process.env.NODE_ENV !== "production";
 
-const executablePath = isLocalDev
-  ? undefined // Let Puppeteer download & use its local Chromium
-  : process.env.PUPPETEER_EXECUTABLE_PATH;
+const isProduction = process.env.NODE_ENV === "production";
 
-      browser = await puppeteer.launch({
-        headless: true,
-        executablePath,
-        args: [
-         "--no-sandbox",
+browser = await puppeteer.launch({
+  headless: true,
+  executablePath: isProduction
+    ? process.env.PUPPETEER_EXECUTABLE_PATH
+    : undefined,
+  args: [
+    "--no-sandbox",
     "--disable-setuid-sandbox",
     "--disable-dev-shm-usage",
     "--disable-gpu",
-        ],
-      });
+  ],
+});
 
 
       const page = await browser.newPage();
