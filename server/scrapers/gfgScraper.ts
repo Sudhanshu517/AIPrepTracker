@@ -1,5 +1,7 @@
 import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
+import 'dotenv/config';
+dotenv.config();
 
 export interface GFGProfile {
   username: string;
@@ -25,8 +27,15 @@ export class GFGScraper {
 
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        args: [
+         "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+        ],
       });
+
 
       const page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
