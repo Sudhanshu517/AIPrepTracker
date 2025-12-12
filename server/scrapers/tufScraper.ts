@@ -15,20 +15,17 @@ export class TUFScraper {
     let browser;
     try {
       console.log(`Starting TUF+ scrape for: ${username}`);
-      const isProduction = process.env.NODE_ENV === "production";
+      const isProd = process.env.NODE_ENV === "production";
 
-browser = await puppeteer.launch({
-  headless: true,
-  executablePath: isProduction
-    ? process.env.PUPPETEER_EXECUTABLE_PATH
-    : undefined,
-  args: [
-    "--no-sandbox",
-    "--disable-setuid-sandbox",
-    "--disable-dev-shm-usage",
-    "--disable-gpu",
-  ],
-});
+      browser = await puppeteer.launch({
+        headless: true,
+        executablePath: isProd ? puppeteer.executablePath() : undefined,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage"
+        ]
+      });
 
 
       const page = await browser.newPage();
