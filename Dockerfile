@@ -25,6 +25,6 @@ EXPOSE 5000
 
 ENV NODE_ENV=production
 # ✔ Correct Chromium path for this base image:
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 CMD ["npm", "start"]
