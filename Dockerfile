@@ -1,14 +1,10 @@
-# -------------------------
-# 1. Base image with Chromium dependencies
-# -------------------------
 FROM ghcr.io/puppeteer/puppeteer:24.33.0
 
-# Install system dependencies required by Chromium
-RUN apt-get update && \
-    apt-get install -y \
-    chromium \
-    chromium-common \
-    chromium-driver \
+# Install Chrome dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    ca-certificates \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -24,55 +20,48 @@ RUN apt-get update && \
     libgtk-3-0 \
     libnspr4 \
     libnss3 \
-    libpangocairo-1.0-0 \
     libpango-1.0-0 \
-    libxcursor1 \
+    libpangocairo-1.0-0 \
+    libx11-xcb1 \
+    libxcomposite1 \
     libxdamage1 \
     libxfixes3 \
-    libxi6 \
     libxrandr2 \
     libxrender1 \
-    libxss1 \
-    libxtst6 \
+    libxshmfence1 \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# -------------------------
-# 2. Set working directory
-# -------------------------
+# Install Chrome (Google official repo)
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get update \
+    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+    && rm ./google-chrome-stable_current_amd64.deb
+
+# Set working directory
 WORKDIR /app
 
-# -------------------------
-# 3. Copy package files first (for caching)
-# -------------------------
+# Copy package files first (better caching)
 COPY package*.json ./
-RUN npm ci
 
-# -------------------------
-# 4. Install dependencies
-# -------------------------
+# Skip puppeteer's built-in Chromium download
 ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+# Install dependencies
 RUN npm install
 
-# -------------------------
-# 5. Copy source code 
-# -------------------------
+# Copy the rest of the project
 COPY . .
 
-# -------------------------
-# 6. Build client (Vite) + bundle server
-# -------------------------
+# Build frontend + server
 RUN npm run build
 
-# -------------------------
-# 7. Expose port Render will use
-# -------------------------
+# Expose Render's port
 EXPOSE 5000
 
-# -------------------------
-# 8. Run in production mode
-# -------------------------
+# Environment settings
 ENV NODE_ENV=production
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
+# Start server
 CMD ["npm", "start"]
