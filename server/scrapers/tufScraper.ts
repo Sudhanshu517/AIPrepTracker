@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import os from 'os';
 
 export interface TUFProfile {
   username: string;
@@ -14,10 +15,15 @@ export class TUFScraper {
     let browser;
     try {
       console.log(`Starting TUF+ scrape for: ${username}`);
+      const isLocalDev = process.env.NODE_ENV !== "production";
+
+const executablePath = isLocalDev
+  ? undefined // Let Puppeteer download & use its local Chromium
+  : process.env.PUPPETEER_EXECUTABLE_PATH;
 
       browser = await puppeteer.launch({
         headless: true,
-        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        executablePath,
         args: [
          "--no-sandbox",
     "--disable-setuid-sandbox",

@@ -1,9 +1,12 @@
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({
-  path: path.resolve(process.cwd(), ".env"),
-});
+// Load .env only in development (Render uses env panel, not .env file)
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env"),
+  });
+}
 
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
