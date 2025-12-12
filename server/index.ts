@@ -1,3 +1,11 @@
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED PROMISE REJECTION:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err);
+});
+
 import * as dotenv from "dotenv";
 import path from "path";
 
