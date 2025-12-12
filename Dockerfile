@@ -1,31 +1,36 @@
-FROM ghcr.io/puppeteer/puppeteer:latest
+FROM ghcr.io/puppeteer/puppeteer:24.33.0
 
-# Set working directory
-WORKDIR usr/src//app
-
-# Copy package files first (better caching)
-COPY package*.json ./
-
-RUN npm ci
-
-# Skip puppeteer's built-in Chromium download
+# Skip Chromium download (Chromium already included)
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# Set work directory
+WORKDIR /app
+
+# Make sure the non-root user can write to /app
+RUN mkdir -p /app && chown -R pptruser:pptruser /app
+
+# Use pptruser (required for Puppeteer)
+USER pptruser
+
+# Copy package files first
+COPY --chown=pptruser:pptruser package*.json ./
+
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the project
-COPY . .
+# Copy rest of the project
+COPY --chown=pptruser:pptruser . .
 
 # Build frontend + server
 RUN npm run build
 
-# Expose Render's port
+# Expose port
 EXPOSE 5000
 
-# Environment settings
+# Production environment
 ENV NODE_ENV=production
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-# Start server
+# Start the server
 CMD ["npm", "start"]
